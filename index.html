@@ -2,110 +2,154 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Assistente Psicotécnico Angola</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #101827;
-      color: white;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    h1 { color: #60a5fa; }
-    p { color: #d1d5db; }
-    textarea {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      margin: 8px 0 15px;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background: #1e293b;
-      color: white;
-      font-size: 16px;
-      min-height: 110px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #2563eb;
-      color: white;
-      border: 0;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: #1e293b;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Psicotécnico Angola</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f4f9;color:#182235;font-family:Arial,sans-serif}
+header{background:#12346b;color:white;padding:22px 16px;text-align:center}
+header h1{margin:0 0 8px;font-size:23px}
+main{max-width:650px;margin:20px auto;padding:16px}
+.card{background:white;padding:20px;border-radius:14px;box-shadow:0 3px 12px #00000012}
+button{border:0;border-radius:9px;padding:13px 16px;font-size:16px;cursor:pointer}
+.primary{background:#1558b0;color:white}
+.secondary{background:#e5eaf2;color:#182235}
+button:disabled{opacity:.45}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#timer{font-size:24px;font-weight:bold;color:#c62828}
+#question{font-size:20px;line-height:1.5;margin:24px 0}
+.option{display:block;width:100%;text-align:left;margin:10px 0;background:#eef2f8;color:#182235;border:2px solid transparent}
+.option.selected{border-color:#1558b0;background:#dceaff}
+.option.correct{background:#d9f6df;border-color:#25833b}
+.option.wrong{background:#ffe0e0;border-color:#c62828}
+.small{color:#657187;font-size:14px}
+.hidden{display:none}
+.progress{height:8px;background:#e1e6ef;border-radius:8px;overflow:hidden;margin-top:14px}
+#bar{height:100%;width:0;background:#2675d8}
+</style>
 </head>
 <body>
-  <h1>Assistente Psicotécnico Angola</h1>
-  <p>Escreve o exercício e recebe uma explicação do raciocínio.</p>
+<header>
+<h1>Simulador Psicotécnico Angola</h1>
+<div>Treino para concursos públicos</div>
+</header>
+<main>
+<section class="card" id="intro">
+<h2>Teste de raciocínio</h2>
+<p>20 perguntas de treino. Tens 60 segundos para responder a cada pergunta.</p>
+<p class="small">Este simulador é apenas para preparação e treino. Não contém nem garante perguntas do exame oficial.</p>
+<button class="primary" onclick="startTest()">Iniciar simulação</button>
+</section>
 
-  <label for="pergunta">Pergunta ou exercício:</label>
-  <textarea id="pergunta" placeholder="Ex.: 2, 4, 8, 16, ... Qual é o próximo número?"></textarea>
+<section class="card hidden" id="test">
+<div class="row">
+<strong id="counter">Pergunta 1 de 20</strong>
+<span id="timer">01:00</span>
+</div>
+<div class="progress"><div id="bar"></div></div>
+<div id="question"></div>
+<div id="options"></div>
+<p class="small" id="notice">Escolhe uma resposta antes de avançar.</p>
+<div class="row">
+<button class="secondary" id="prev" onclick="move(-1)">Anterior</button>
+<button class="primary" id="next" onclick="move(1)">Seguinte</button>
+</div>
+</section>
 
-  <label for="alternativas">Alternativas (opcional):</label>
-  <textarea id="alternativas" placeholder="A) 20&#10;B) 24&#10;C) 32&#10;D) 36"></textarea>
+<section class="card hidden" id="result">
+<h2>Resultado da simulação</h2>
+<h1 id="score"></h1>
+<p id="summary"></p>
+<div id="review"></div>
+<button class="primary" onclick="location.reload()">Repetir teste</button>
+</section>
+</main>
 
-  <button id="botao" onclick="analisar()">Analisar exercício</button>
-  <div id="resultado">A resposta da IA aparecerá aqui.</div>
-
-  <script>
-    async function analisar() {
-      const pergunta = document.getElementById("pergunta").value.trim();
-      const alternativas = document.getElementById("alternativas").value.trim();
-      const resultado = document.getElementById("resultado");
-      const botao = document.getElementById("botao");
-
-      if (!pergunta) {
-        resultado.textContent = "Escreve primeiro uma pergunta.";
-        return;
-      }
-
-      botao.disabled = true;
-      botao.textContent = "A analisar...";
-      resultado.textContent = "A consultar a inteligência artificial. Aguarda...";
-
-      try {
-        const resposta = await fetch(
-          "https://assistente-psicotecnico-api.onrender.com/analisar",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              pergunta: pergunta,
-              alternativas: alternativas
-            })
-          }
-        );
-
-        const dados = await resposta.json();
-
-        if (!resposta.ok) {
-          throw new Error(dados.detail || "Ocorreu um erro.");
-        }
-
-        resultado.textContent = dados.resposta || "A IA não devolveu uma resposta.";
-      } catch (erro) {
-        resultado.textContent =
-          "Não foi possível obter a resposta. Verifica a ligação à internet e tenta novamente. Detalhe: " +
-          erro.message;
-      } finally {
-        botao.disabled = false;
-        botao.textContent = "Analisar exercício";
-      }
-    }
-  </script>
+<script>
+const questions=[
+{q:"Completa a sequência: 2, 4, 6, 8, ?",o:["9","10","12","14"],a:1},
+{q:"Completa: 3, 6, 12, 24, ?",o:["30","36","48","50"],a:2},
+{q:"Qual é o intruso?",o:["Cão","Gato","Leão","Mesa"],a:3},
+{q:"Se todos os agentes são disciplinados e Paulo é agente, então:",o:["Paulo é disciplinado","Paulo é médico","Nenhum agente é disciplinado","Não é possível concluir"],a:0},
+{q:"Quanto é 15 + 27?",o:["32","40","42","45"],a:2},
+{q:"Completa: 20, 17, 14, 11, ?",o:["8","9","7","6"],a:0},
+{q:"Qual palavra é diferente?",o:["Janeiro","Março","Segunda-feira","Junho"],a:2},
+{q:"Se hoje é terça-feira, que dia será daqui a 3 dias?",o:["Quarta-feira","Quinta-feira","Sexta-feira","Sábado"],a:2},
+{q:"Completa: 1, 4, 9, 16, ?",o:["20","24","25","36"],a:2},
+{q:"Um objeto custa 200 Kz. Quanto custam 3 objetos?",o:["400 Kz","500 Kz","600 Kz","800 Kz"],a:2},
+{q:"Qual é o oposto de 'aumentar'?",o:["Crescer","Diminuir","Somar","Avançar"],a:1},
+{q:"Completa: A, C, E, G, ?",o:["H","I","J","K"],a:1},
+{q:"Se 5 pessoas dividem igualmente 20 maçãs, cada uma recebe:",o:["2","3","4","5"],a:2},
+{q:"Qual número é o maior?",o:["0,8","0,08","0,18","0,5"],a:0},
+{q:"Todos os livros estão na mesa. Este objeto é um livro. Logo:",o:["Está na mesa","Está no chão","É uma cadeira","Não se sabe"],a:0},
+{q:"Completa: 100, 90, 80, 70, ?",o:["65","60","50","55"],a:1},
+{q:"Qual não pertence ao grupo?",o:["Círculo","Triângulo","Quadrado","Azul"],a:3},
+{q:"Quanto é metade de 86?",o:["42","43","44","46"],a:1},
+{q:"Se 2 trabalhadores terminam um serviço em 6 dias, não podemos concluir sem mais dados que 4 trabalhadores levarão:",o:["Sempre 3 dias","Sempre 6 dias","Sempre 12 dias","Um tempo exato garantido"],a:3},
+{q:"Completa a sequência: 5, 10, 20, 40, ?",o:["45","60","80","100"],a:2}
+];
+let index=0,answers=Array(questions.length).fill(null),remaining=60,interval=null,finished=false;
+function startTest(){
+document.getElementById("intro").classList.add("hidden");
+document.getElementById("test").classList.remove("hidden");
+showQuestion();
+}
+function showQuestion(){
+clearInterval(interval);remaining=60;
+const q=questions[index];
+document.getElementById("counter").textContent=`Pergunta ${index+1} de ${questions.length}`;
+document.getElementById("question").textContent=q.q;
+document.getElementById("options").innerHTML="";
+q.o.forEach((opt,i)=>{
+const b=document.createElement("button");
+b.className="option"+(answers[index]===i?" selected":"");
+b.textContent=String.fromCharCode(65+i)+") "+opt;
+b.onclick=()=>{answers[index]=i;showOptionsOnly();};
+document.getElementById("options").appendChild(b);
+});
+document.getElementById("prev").disabled=index===0;
+document.getElementById("next").textContent=index===questions.length-1?"Terminar teste":"Seguinte";
+document.getElementById("bar").style.width=(index/questions.length*100)+"%";
+document.getElementById("notice").textContent=answers[index]===null?"Escolhe uma resposta antes de avançar.":"Resposta selecionada.";
+updateTimer();
+interval=setInterval(()=>{
+remaining--;updateTimer();
+if(remaining<=0){
+clearInterval(interval);
+if(index<questions.length-1){index++;showQuestion();}
+else finishTest();
+}
+},1000);
+}
+function showOptionsOnly(){
+const buttons=document.querySelectorAll(".option");
+buttons.forEach((b,i)=>b.classList.toggle("selected",answers[index]===i));
+document.getElementById("notice").textContent="Resposta selecionada.";
+}
+function updateTimer(){
+document.getElementById("timer").textContent="00:"+String(remaining).padStart(2,"0");
+}
+function move(direction){
+if(direction===1&&index===questions.length-1){finishTest();return;}
+index=Math.max(0,Math.min(questions.length-1,index+direction));
+showQuestion();
+}
+function finishTest(){
+clearInterval(interval);finished=true;
+document.getElementById("test").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+let score=0;
+questions.forEach((q,i)=>{if(answers[i]===q.a)score++;});
+document.getElementById("score").textContent=`${score} / ${questions.length} (${Math.round(score/questions.length*100)}%)`;
+document.getElementById("summary").textContent="Resultado de treino. Revê as respostas abaixo para aprender com os erros.";
+const review=document.getElementById("review");review.innerHTML="";
+questions.forEach((q,i)=>{
+const p=document.createElement("p");
+p.innerHTML=`<strong>${i+1}. ${q.q}</strong><br>Sua resposta: ${answers[i]===null?"Sem resposta":q.o[answers[i]]}<br>Resposta correta: ${q.o[q.a]}`;
+review.appendChild(p);
+});
+}
+</script>
 </body>
 </html>
