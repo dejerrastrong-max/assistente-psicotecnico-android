@@ -4,83 +4,433 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#12346b">
 <title>Assistente Psicotécnico Angola</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f4f9;color:#182235}
-header{background:#12346b;color:white;text-align:center;padding:24px 15px}
-header h1{font-size:23px;margin:0 0 8px}
-main{max-width:650px;margin:22px auto;padding:15px}
-.card{background:white;padding:20px;border-radius:14px;box-shadow:0 3px 12px #0001}
-label{display:block;font-weight:bold;margin:18px 0 8px}
-textarea{width:100%;padding:13px;border:1px solid #ccd3df;border-radius:9px;font-size:16px;resize:vertical}
-#pergunta{min-height:120px}
-#alternativas{min-height:90px}
-button{width:100%;padding:14px;margin-top:18px;background:#1558b0;color:white;border:0;border-radius:9px;font-size:16px;font-weight:bold}
-button:disabled{opacity:.6}
-#resposta{white-space:pre-wrap;line-height:1.6;margin-top:20px}
-.info{color:#647187;font-size:13px;line-height:1.5}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f4f9;
+  color: #182235;
+}
+
+header {
+  background: #12346b;
+  color: white;
+  padding: 38px 18px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 10px;
+  font-size: 26px;
+}
+
+header p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 750px;
+  margin: 25px auto;
+  padding: 18px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 15px;
+  padding: 24px;
+  box-shadow: 0 4px 16px #0000000a;
+}
+
+.info-card h2 {
+  margin-top: 0;
+}
+
+.info-card p {
+  line-height: 1.7;
+  color: #526078;
+}
+
+/* Botão flutuante */
+
+#chat-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 62px;
+  height: 62px;
+  border: none;
+  border-radius: 50%;
+  background: #1558b0;
+  color: white;
+  font-size: 29px;
+  cursor: pointer;
+  box-shadow: 0 5px 20px #00000035;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#chat-toggle:focus-visible,
+button:focus-visible {
+  outline: 3px solid #f0a500;
+  outline-offset: 3px;
+}
+
+/* Janela de chat */
+
+#chat-window {
+  position: fixed;
+  right: 20px;
+  bottom: 96px;
+  width: min(390px, calc(100vw - 24px));
+  height: min(560px, calc(100dvh - 125px));
+  min-height: 340px;
+  background: white;
+  border-radius: 17px;
+  box-shadow: 0 8px 35px #00000030;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+#chat-window.open {
+  display: flex;
+}
+
+.chat-header {
+  background: #12346b;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  background: #ffffff20;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.chat-heading {
+  flex: 1;
+}
+
+.chat-heading strong {
+  display: block;
+  font-size: 15px;
+}
+
+.chat-heading small {
+  display: block;
+  margin-top: 5px;
+  color: #dbe8ff;
+}
+
+#chat-close {
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 27px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  background: #f6f8fc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  max-width: 90%;
+  padding: 11px 13px;
+  border-radius: 13px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.bot {
+  background: white;
+  border: 1px solid #e1e6ef;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.user {
+  background: #1558b0;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+#chat-form {
+  padding: 12px;
+  background: white;
+  border-top: 1px solid #e3e7ef;
+}
+
+#pergunta {
+  width: 100%;
+  min-height: 72px;
+  max-height: 130px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #cbd4e2;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+}
+
+#alternativas {
+  width: 100%;
+  min-height: 45px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid #cbd4e2;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+}
+
+#send {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 9px;
+  background: #1558b0;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#send:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.disclaimer {
+  padding: 0 12px 10px;
+  background: white;
+  font-size: 11px;
+  color: #68758b;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  #chat-toggle {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  #chat-window {
+    right: 12px;
+    bottom: 88px;
+    width: calc(100vw - 24px);
+    height: min(560px, calc(100dvh - 108px));
+  }
+}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>Assistente Psicotécnico Angola</h1>
-<div>Treina o teu raciocínio com ajuda da IA</div>
+  <h1>Assistente Psicotécnico Angola</h1>
+  <p>O teu apoio para treinar o raciocínio e resolver perguntas psicotécnicas.</p>
 </header>
+
 <main>
-<div class="card">
-<h2>Analisa a tua pergunta</h2>
-<p class="info">Escreve a pergunta psicotécnica e, se existirem, as alternativas. A IA explicará o raciocínio e indicará a resposta mais provável.</p>
-
-<label for="pergunta">Pergunta psicotécnica</label>
-<textarea id="pergunta" placeholder="Ex.: Completa a sequência: 2, 4, 8, 16, ?"></textarea>
-
-<label for="alternativas">Alternativas (opcional)</label>
-<textarea id="alternativas" placeholder="A) 24&#10;B) 30&#10;C) 32&#10;D) 36"></textarea>
-
-<button id="analisar" onclick="analisarPergunta()">Analisar pergunta</button>
-<div id="resposta" aria-live="polite"></div>
-</div>
-<p class="info">Ferramenta de treino e estudo. Não é um sistema oficial do MININT e as respostas da IA podem conter erros.</p>
+  <section class="info-card">
+    <h2>Bem-vindo!</h2>
+    <p>
+      Precisas de ajuda com uma sequência numérica, lógica ou outra
+      pergunta psicotécnica? Abre o chat no canto inferior direito.
+    </p>
+    <p>
+      Escreve a pergunta e, se existirem, acrescenta as alternativas.
+      O assistente irá analisar o problema e explicar o raciocínio.
+    </p>
+    <p>
+      <strong>Nota:</strong> ferramenta de treino independente.
+      Não é um serviço oficial do MININT e a IA pode cometer erros.
+    </p>
+  </section>
 </main>
 
-<script>
-async function analisarPergunta(){
-const pergunta=document.getElementById("pergunta").value.trim();
-const alternativas=document.getElementById("alternativas").value.trim();
-const botao=document.getElementById("analisar");
-const saida=document.getElementById("resposta");
+<button id="chat-toggle"
+        type="button"
+        aria-label="Abrir assistente"
+        aria-expanded="false"
+        aria-controls="chat-window">💬</button>
 
-if(!pergunta){
-saida.textContent="Escreve primeiro a pergunta.";
-return;
+<section id="chat-window" role="dialog"
+         aria-label="Assistente Psicotécnico">
+  <div class="chat-header">
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-heading">
+      <strong>Assistente Psicotécnico</strong>
+      <small>Ajuda com perguntas e raciocínio</small>
+    </div>
+    <button id="chat-close" type="button"
+            aria-label="Fechar chat">×</button>
+  </div>
+
+  <div id="messages" aria-live="polite">
+    <div class="message bot">Olá! 👋 Envia a tua pergunta psicotécnica. Se tiver alternativas, podes colocá-las no campo abaixo. Vou ajudar-te a analisar o raciocínio.</div>
+  </div>
+
+  <form id="chat-form">
+    <textarea id="pergunta"
+      placeholder="Escreve ou cola a pergunta..."
+      aria-label="Pergunta psicotécnica"
+      required></textarea>
+
+    <textarea id="alternativas"
+      placeholder="Alternativas (opcional): A) ... B) ..."
+      aria-label="Alternativas"></textarea>
+
+    <button id="send" type="submit">Analisar pergunta</button>
+  </form>
+
+  <div class="disclaimer">
+    Respostas geradas por IA. Confirma sempre o raciocínio.
+  </div>
+</section>
+
+<script>
+const API_URL = "https://assistente-psicotecnico-api.onrender.com/analisar";
+
+const toggle = document.getElementById("chat-toggle");
+const windowChat = document.getElementById("chat-window");
+const closeButton = document.getElementById("chat-close");
+const form = document.getElementById("chat-form");
+const perguntaInput = document.getElementById("pergunta");
+const alternativasInput = document.getElementById("alternativas");
+const messages = document.getElementById("messages");
+const sendButton = document.getElementById("send");
+
+function openChat() {
+  windowChat.classList.add("open");
+  toggle.setAttribute("aria-expanded", "true");
+  toggle.textContent = "✕";
+  toggle.setAttribute("aria-label", "Fechar assistente");
+  perguntaInput.focus();
 }
 
-botao.disabled=true;
-botao.textContent="A analisar...";
-saida.textContent="A IA está a analisar a pergunta. Aguarda, por favor.";
+function closeChat() {
+  windowChat.classList.remove("open");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.textContent = "💬";
+  toggle.setAttribute("aria-label", "Abrir assistente");
+}
 
-try{
-const resposta=await fetch("https://assistente-psicotecnico-api.onrender.com/analisar",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({pergunta:pergunta,alternativas:alternativas})
+toggle.addEventListener("click", () => {
+  if (windowChat.classList.contains("open")) {
+    closeChat();
+  } else {
+    openChat();
+  }
 });
 
-const dados=await resposta.json();
+closeButton.addEventListener("click", closeChat);
 
-if(!resposta.ok){
-throw new Error(dados.detail||"Não foi possível analisar a pergunta.");
+function addMessage(text, type) {
+  const item = document.createElement("div");
+  item.className = "message " + type;
+  item.textContent = text;
+  messages.appendChild(item);
+  messages.scrollTop = messages.scrollHeight;
+  return item;
 }
 
-saida.textContent=dados.resposta||"A IA não devolveu uma resposta.";
-}catch(erro){
-saida.textContent="Não foi possível obter a resposta. Verifica a ligação à internet e tenta novamente.\nDetalhe: "+erro.message;
-}finally{
-botao.disabled=false;
-botao.textContent="Analisar pergunta";
-}
-}
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const pergunta = perguntaInput.value.trim();
+  const alternativas = alternativasInput.value.trim();
+
+  if (!pergunta) {
+    perguntaInput.focus();
+    return;
+  }
+
+  addMessage(
+    pergunta + (alternativas ? "\nAlternativas:\n" + alternativas : ""),
+    "user"
+  );
+
+  perguntaInput.value = "";
+  alternativasInput.value = "";
+  sendButton.disabled = true;
+  sendButton.textContent = "A analisar...";
+
+  const loading = addMessage("A analisar a pergunta. Aguarda, por favor...", "bot");
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        pergunta: pergunta,
+        alternativas: alternativas
+      })
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("O servidor devolveu uma resposta inválida.");
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        typeof data.detail === "string"
+          ? data.detail
+          : "O servidor não conseguiu analisar a pergunta."
+      );
+    }
+
+    loading.textContent = data.resposta || "A IA não devolveu uma resposta.";
+
+  } catch (error) {
+    loading.textContent =
+      "Não consegui obter uma resposta. Verifica a internet e tenta novamente. " +
+      "Se o servidor estiver a iniciar, aguarda um pouco.\n\nDetalhe: " +
+      error.message;
+  } finally {
+    sendButton.disabled = false;
+    sendButton.textContent = "Analisar pergunta";
+    messages.scrollTop = messages.scrollHeight;
+  }
+});
 </script>
+
 </body>
 </html>
