@@ -1,1 +1,156 @@
 
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Assistente Psicotécnico Angola</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #101827;
+      color: #f3f4f6;
+      font-family: Arial, sans-serif;
+    }
+    .app { max-width: 600px; margin: auto; }
+    header { padding: 18px 0; }
+    h1 { font-size: 27px; margin-bottom: 8px; }
+    .sub { color: #aab5c7; line-height: 1.5; }
+    .card {
+      background: #1b2638;
+      border: 1px solid #344258;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 18px 0;
+    }
+    label { display: block; margin: 14px 0 8px; }
+    textarea, input, select {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #526078;
+      background: #101827;
+      color: white;
+      font-size: 16px;
+    }
+    textarea { min-height: 115px; resize: vertical; }
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      background: #fbbf24;
+      color: #111827;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #101827;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    .muted { color: #aab5c7; font-size: 13px; }
+    footer { color: #9ca3af; font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>🧠 ASSISTENTE DE TREINO</div>
+      <h1>Assistente Psicotécnico Angola</h1>
+      <div class="sub">
+        Pratica o raciocínio lógico e aprende a resolver exercícios.
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Experimentar uma questão</h2>
+      <p class="muted">
+        Introduz um exercício de treino para receber uma análise.
+      </p>
+
+      <label for="question">Pergunta ou sequência</label>
+      <textarea id="question"
+        placeholder="Ex.: 3, 6, 12, 24, qual é o próximo número?"></textarea>
+
+      <label for="options">Alternativas (opcional)</label>
+      <input id="options"
+        placeholder="Ex.: A) 36; B) 42; C) 48; D) 52">
+
+      <button onclick="analyze()">Analisar exercício</button>
+
+      <div id="result" class="result" aria-live="polite">
+        A análise aparecerá aqui.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Testar um exemplo</h2>
+      <p>Sequência: 2, 4, 8, 16, ?</p>
+      <button onclick="example()">Carregar exemplo</button>
+    </section>
+
+    <footer>
+      Ferramenta de treino. Esta versão ainda não está ligada a uma IA.
+    </footer>
+  </main>
+
+  <script>
+    function example() {
+      document.getElementById("question").value =
+        "2, 4, 8, 16, qual é o próximo número?";
+      document.getElementById("options").value =
+        "A) 18; B) 24; C) 32; D) 36";
+      analyze();
+    }
+
+    function analyze() {
+      const q = document.getElementById("question").value.trim();
+      const options = document.getElementById("options").value.trim();
+      const result = document.getElementById("result");
+
+      if (!q) {
+        result.textContent = "Introduz primeiro uma pergunta.";
+        return;
+      }
+
+      const numbers = q.match(/-?\d+(?:[.,]\d+)?/g);
+      let message =
+        "Pergunta recebida. Esta versão ainda não utiliza IA; " +
+        "não consegue resolver automaticamente todos os tipos de exercício.";
+
+      if (numbers && numbers.length >= 3) {
+        const n = numbers.map(x => Number(x.replace(",", ".")));
+        const d = n.slice(1).map((x, i) => x - n[i]);
+        const ratios = n.slice(1).map((x, i) =>
+          n[i] !== 0 ? x / n[i] : null
+        );
+
+        if (ratios.every(x => x !== null && Math.abs(x - 2) < 0.000001)) {
+          message = "Padrão possível: multiplicar por 2. " +
+            "O próximo termo seria " + (n[n.length - 1] * 2) + ".";
+        } else if (d.length >= 2 &&
+          d.every(x => Math.abs(x - d[0]) < 0.000001)) {
+          message = "Padrão possível: somar " + d[0] +
+            " em cada passo. O próximo termo seria " +
+            (n[n.length - 1] + d[0]) + ".";
+        } else {
+          message = "Números identificados: " + n.join(", ") +
+            ". Não consegui identificar uma regra simples com segurança.";
+        }
+      }
+
+      result.textContent = message +
+        (options ? " Alternativas fornecidas: " + options : "");
+    }
+  </script>
+</body>
+</html>
